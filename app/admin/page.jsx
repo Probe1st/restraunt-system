@@ -1,22 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EmployeesSection from "@/components/admin/EmployeesSection";
 import ShiftsSection from "@/components/admin/ShiftsSection";
 import OrdersSection from "@/components/admin/OrdersSection";
+import { jwtVerify } from "jose";
 
-export default async function AdminPage() {
-    const [activeTab, setActiveTab] =
-        (useState < "employees") | "orders" | ("shifts" > "employees");
+export default function AdminPage() {
+    const [activeTab, setActiveTab] = useState("orders");
+    // (useState < "employees") | "orders" | ("shifts" > "employees");
+    const [role, setRole] = useState("admin");
+    
+    useEffect(() => {
+        async function getRole() {
+            const accessToken = localStorage.getItem("accessToken");
+            const {
+                payload: { role: newRole },
+            } = await jwtVerify(
+                accessToken,
+                new TextEncoder().encode(process.env.JWT_SECRET),
+            );
 
-    const accessToken = request.headers.get("authorization").split(" ")[1];
+            setRole(newRole);
+        }
 
-    const {
-        payload: { role },
-    } = await jwtVerify(
-        accessToken,
-        new TextEncoder().encode(process.env.JWT_SECRET),
-    );
+        getRole();
+    }, []);
 
     if (role !== "admin") {
         return (

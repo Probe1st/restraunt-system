@@ -29,6 +29,11 @@ export default function LoginPage() {
                 throw new Error(errorData.error || "Ошибка авторизации");
             }
 
+            localStorage.setItem(
+                "accessToken",
+                await response.json().then((data) => data.accessToken),
+            );
+
             router.push("/admin");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Неизвестная ошибка");
