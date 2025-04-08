@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { jwtVerify, SignJWT } from "jose";
 import { Pool } from "pg";
+import { DatabaseService } from "@/utilities/DatabaseService";
 
 // Настройки подключения к PostgreSQL
 const pool = new Pool({
@@ -10,6 +11,8 @@ const pool = new Pool({
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
 });
+
+const Users = new DatabaseService("users");
 
 export async function GET() {
     try {
@@ -37,10 +40,15 @@ export async function GET() {
         }
 
         // 3. Проверяем подпись и срок действия refreshToken (если используется JWT)
+        let userId = -1;
         try {
             const secretKey = new TextEncoder().encode(process.env.JWT_SECRET);
 
-            await jwtVerify(refreshToken, secretKey);
+            const {
+                payload: { userId: id },
+            } = await jwtVerify(refreshToken, secretKey);
+            
+            userId = id;
         } catch (error) {
             return new Response("Invalid or expired refresh token", {
                 status: 401,
@@ -48,13 +56,14 @@ export async function GET() {
         }
 
         // 4. Генерируем новый accessToken
+        const user = await Users.getById(userId);
         const accessToken = await new SignJWT({
             userId: user.id,
             role: user.role,
         })
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
-            .setExpirationTime(process.env.ACCESS_TOKEN_EXPIRES_IN) // Срок действия 1 час
+            .setExpirationTime(process.env.ACCESS_TOKEN_EXPIRES_IN) 
             .sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
         // 5. Возвращаем новый accessToken
