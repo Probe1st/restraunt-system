@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import '../../global.css';
 
 function MainComponent() {
   const { data: user, loading } = useUser();

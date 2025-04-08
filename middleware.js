@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 // Пути, которые не требуют авторизации
-const PUBLIC_ROUTES = ["/api/auth/login", "/api/auth/refresh"];
+const PUBLIC_ROUTES = ["/api/auth/login", "/api/auth/refresh", "/login", "/admin", "/waiter", "/chef"];
 
 export async function middleware(request) {
     const path = request.nextUrl.pathname;
